@@ -9,6 +9,10 @@ import android.telephony.TelephonyManager;
 import android.content.Context;
 import com.facebook.react.bridge.Promise;
 
+import android.app.admin.DevicePolicyManager;
+import android.app.enterprise.EnterpriseDeviceManager;
+import android.app.enterprise.LocationPolicy;
+
 public class RNMdmModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
@@ -23,14 +27,25 @@ public class RNMdmModule extends ReactContextBaseJavaModule {
     return "RNMdm";
   }
 
-  
-@ReactMethod
-public void getIMEI(Promise promise) {
-try {
-TelephonyManager tm = (TelephonyManager) this.reactContext.getSystemService(Context.TELEPHONY_SERVICE);
-promise.resolve(tm.getDeviceId());
-} catch (Exception e) {
-promise.reject(e.getMessage());
-}
-}
+  @ReactMethod
+  public void getIMEI(Promise promise) {
+    try {
+      TelephonyManager tm = (TelephonyManager) this.reactContext.getSystemService(Context.TELEPHONY_SERVICE);
+      promise.resolve(tm.getDeviceId());
+    } catch (Exception e) {
+      promise.reject(e.getMessage());
+    }
+  }
+
+  @ReactMethod
+  public void isAdminActive(Promise promise) {
+    try {
+      DevicePolicyManager mDPM = (DevicePolicyManager) this.reactContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+      ComponentName mDeviceAdmin = new ComponentName(this, RNMdmModule.class);
+      boolean IS_DEVICE_ADMIN_ACTIVE = mDPM.isAdminActive(mDeviceAdmin);
+      promise.resolve(IS_DEVICE_ADMIN_ACTIVE);
+    } catch (Exception e) {
+      promise.reject(e.getMessage());
+    }
+  }
 }
