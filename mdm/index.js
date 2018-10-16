@@ -1,6 +1,5 @@
-
 import { NativeModules } from 'react-native';
 
-const { RNMdm } = NativeModules;
+const { RNMdm, RNSamsungMdm } = NativeModules;
 
-export default RNMdm;
+export default { RNMdm, RNSamsungMdm };
