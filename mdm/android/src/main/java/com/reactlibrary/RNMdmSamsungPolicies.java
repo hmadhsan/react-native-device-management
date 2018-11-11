@@ -8,10 +8,13 @@ import android.app.enterprise.RestrictionPolicy;
 import android.app.enterprise.license.EnterpriseLicenseManager;
 import android.util.Log;
 
+import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import android.app.Activity;
+import android.content.Intent;
 
 import org.json.JSONArray;
 
@@ -40,7 +43,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             mp.setCameraState(true);
             promise.resolve(true);
         } catch (Exception e) {
-            promise.reject(e.getMessage());
+            promise.resolve(false);
         }
     }
 

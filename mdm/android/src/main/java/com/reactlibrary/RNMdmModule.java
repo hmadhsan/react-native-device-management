@@ -16,7 +16,7 @@ import com.facebook.react.bridge.ReactMethod;
 
 import java.util.HashMap;
 
-public class RNMdmModule extends ReactContextBaseJavaModule implements ActivityEventListener {
+public class RNMdmModule extends ReactContextBaseJavaModule {
 
     private final ReactApplicationContext reactContext;
     private final HashMap<Integer, Promise> mdmPromises;
@@ -53,9 +53,9 @@ public class RNMdmModule extends ReactContextBaseJavaModule implements ActivityE
             Activity currentActivity = getCurrentActivity();
             Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mDeviceAdmin);
-            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Fareye enabling Device Admin privelage.");
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enabling Device Admin privilege.");
             currentActivity.startActivityForResult(intent, deviceAdminRequestCode);
-            mdmPromises.put(deviceAdminRequestCode, promise);
+            promise.resolve(true);
         } catch (Exception e) {
             promise.reject(e.getMessage());
         }
@@ -76,40 +76,27 @@ public class RNMdmModule extends ReactContextBaseJavaModule implements ActivityE
         }
     }
 
+    @ReactMethod
+    public void startOrStopApplicationAliveService(boolean isStart, String packageName, Promise promise) {
+        try {
+            if (isStart) {
+                Intent intent = new Intent(this.reactContext, ApplicationToFrontService.class);
+                intent.putExtra("packageName", packageName);
+                this.reactContext.startService(intent);
+            } else {
+                this.reactContext.stopService(new Intent(this.reactContext, ApplicationToFrontService.class));
+            }
+            promise.resolve(true);
+        } catch (Exception e) {
+            promise.reject(e.getMessage());
+        }
+    }
+
     public boolean isOSAndModelValidForMDM() {
         if (Build.MANUFACTURER.contains("samsung") && Build.VERSION.SDK_INT >= 17) {
             return true;
         } else {
             return false;
         }
-    }
-
-    @Override
-    public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        Promise promise = mdmPromises.get(requestCode);
-        if (requestCode == deviceAdminRequestCode) {
-            if (promise != null && resultCode == Activity.RESULT_OK) {
-                promise.resolve("Accepted");
-            } else {
-                promise.reject("Not Accepted");
-            }
-        }
-    }
-
-    @Override
-    public void initialize() {
-        super.initialize();
-        getReactApplicationContext().addActivityEventListener(this);
-    }
-
-    @Override
-    public void onCatalystInstanceDestroy() {
-        super.onCatalystInstanceDestroy();
-        getReactApplicationContext().removeActivityEventListener(this);
-    }
-
-    @Override
-    public void onNewIntent(Intent intent) {
-        /* Do nothing */
     }
 }
