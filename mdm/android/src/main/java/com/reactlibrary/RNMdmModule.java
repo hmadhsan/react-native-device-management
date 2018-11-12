@@ -2,6 +2,8 @@
 package com.reactlibrary;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -79,12 +81,13 @@ public class RNMdmModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void startOrStopApplicationAliveService(boolean isStart, String packageName, Promise promise) {
         try {
+            Intent intent = new Intent(this.reactContext, ApplicationToFrontService.class);
+            intent.putExtra("packageName", packageName);
             if (isStart) {
-                Intent intent = new Intent(this.reactContext, ApplicationToFrontService.class);
-                intent.putExtra("packageName", packageName);
                 this.reactContext.startService(intent);
             } else {
-                this.reactContext.stopService(new Intent(this.reactContext, ApplicationToFrontService.class));
+                this.reactContext.stopService(intent);
+                cancelAlarm();
             }
             promise.resolve(true);
         } catch (Exception e) {
@@ -97,6 +100,15 @@ public class RNMdmModule extends ReactContextBaseJavaModule {
             return true;
         } else {
             return false;
+        }
+    }
+
+    private void cancelAlarm() {
+        Intent intent = new Intent(this.reactContext, ApplicationToFrontService.class);
+        PendingIntent sender = PendingIntent.getService(this.reactContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) this.reactContext.getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            alarmManager.cancel(sender);
         }
     }
 }

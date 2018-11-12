@@ -22,7 +22,6 @@ public class ApplicationToFrontService extends IntentService {
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
      */
     public ApplicationToFrontService() {
         super("ApplicationToFrontService");
