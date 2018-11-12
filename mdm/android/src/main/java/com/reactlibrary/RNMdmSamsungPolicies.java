@@ -5,6 +5,7 @@ import android.app.enterprise.EnterpriseDeviceManager;
 import android.app.enterprise.MiscPolicy;
 import android.app.enterprise.PhoneRestrictionPolicy;
 import android.app.enterprise.RestrictionPolicy;
+import android.app.enterprise.LocationPolicy;
 import android.app.enterprise.license.EnterpriseLicenseManager;
 import android.util.Log;
 
@@ -51,6 +52,21 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     public void enableSamsungPolicies(String packageName, String elmLicenseKey, Promise promise) {
         try {
             EnterpriseLicenseManager.getInstance(this.reactContext).activateLicense(elmLicenseKey, packageName);
+            promise.resolve(true);
+        } catch (Exception e) {
+            promise.reject(e.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void enableOrDisableGps(boolean gpsMandatory, Promise promise) {
+        try {
+            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            LocationPolicy locationPolicy = mEDM.getLocationPolicy();
+            if (gpsMandatory && !locationPolicy.getLocationProviderState("gps")) {
+                locationPolicy.startGPS(true);
+            }
+            locationPolicy.setGPSStateChangeAllowed(!gpsMandatory);
             promise.resolve(true);
         } catch (Exception e) {
             promise.reject(e.getMessage());
@@ -111,7 +127,6 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             JSONArray appsToBeUninstalledList = new JSONArray(appsToBeUninstalled);
             List<String> appList = new ArrayList<>();
             for (int index = 0; index < appsToBeUninstalledList.length(); index++) {
-                Log.i("TestActivity", "appName >>>> " + appsToBeUninstalledList.getString(index));
                 appList.add(appsToBeUninstalledList.getString(index));
             }
             EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
@@ -132,7 +147,6 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             appPolicy.clearAppPackageNameFromList();
             for (int index = 0; index < appsToBeBlackListedList.length(); index++) {
-                Log.i("TestActivity", "appName >>>> " + appsToBeBlackListedList.getString(index));
                 result = appPolicy.addAppPackageNameToBlackList(appsToBeBlackListedList.getString(index));
                 result = appPolicy.setDisableApplication(appsToBeBlackListedList.getString(index));
             }
@@ -143,11 +157,11 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void keepApplicationAlive(boolean isForceStopEnabled, Promise promise) {
+    public void keepApplicationAlive(String packageName, boolean isForceStopEnabled, Promise promise) {
         try {
             boolean result = false;
             List packageList = new ArrayList();
-            packageList.add("com.fareyereact");
+            packageList.add(packageName);
             EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             if (isForceStopEnabled) {
@@ -162,7 +176,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void enableOrDisableNotification(String packageName,boolean isNotificationDisabled, Promise promise) {
+    public void enableOrDisableNotification(String packageName, boolean isNotificationDisabled, Promise promise) {
         try {
             boolean result = false;
             List packageList = new ArrayList();
