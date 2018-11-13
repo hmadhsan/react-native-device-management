@@ -95,11 +95,12 @@ public class RNMdmModule extends ReactContextBaseJavaModule {
         }
     }
 
-    public boolean isOSAndModelValidForMDM() {
+    @ReactMethod
+    public void isOSAndModelValidForMDM(Promise promise) {
         if (Build.MANUFACTURER.contains("samsung") && Build.VERSION.SDK_INT >= 17) {
-            return true;
+            promise.resolve(true);
         } else {
-            return false;
+            promise.resolve(false);
         }
     }
 
