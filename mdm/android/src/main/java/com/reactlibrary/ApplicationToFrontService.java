@@ -76,7 +76,7 @@ public class ApplicationToFrontService extends IntentService {
     private void setWakeupAlarm(String packageName) {
         Intent intent = new Intent(this, ApplicationToFrontService.class);
         intent.putExtra("packageName", packageName);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
         Calendar calendar = Calendar.getInstance();
