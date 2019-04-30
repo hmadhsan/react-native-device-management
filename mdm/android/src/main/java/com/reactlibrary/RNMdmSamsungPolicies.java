@@ -38,7 +38,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
         return "RNSamsungMdm";
     }
 
-    public void activateKnoxLicense(Context context, String licenseKey,packageName) {
+    public void activateKnoxLicense(Context context, String licenseKey,String packageName) {
         try{
             KnoxEnterpriseLicenseManager knoxEnterpriseLicenseManager = KnoxEnterpriseLicenseManager.getInstance(context);
             knoxEnterpriseLicenseManager.activateLicense(licenseKey,packageName);
