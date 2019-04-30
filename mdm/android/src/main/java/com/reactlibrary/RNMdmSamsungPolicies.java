@@ -1,12 +1,6 @@
 package com.reactlibrary;
 
-import android.app.enterprise.ApplicationPolicy;
-import android.app.enterprise.EnterpriseDeviceManager;
-import android.app.enterprise.MiscPolicy;
-import android.app.enterprise.PhoneRestrictionPolicy;
-import android.app.enterprise.RestrictionPolicy;
-import android.app.enterprise.LocationPolicy;
-import android.app.enterprise.license.EnterpriseLicenseManager;
+import android.content.Context;
 import android.util.Log;
 
 import com.facebook.react.bridge.ActivityEventListener;
@@ -14,6 +8,13 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.samsung.android.knox.EnterpriseDeviceManager;
+import com.samsung.android.knox.application.ApplicationPolicy;
+import com.samsung.android.knox.license.EnterpriseLicenseManager;
+import com.samsung.android.knox.license.KnoxEnterpriseLicenseManager;
+import com.samsung.android.knox.location.LocationPolicy;
+import com.samsung.android.knox.restriction.PhoneRestrictionPolicy;
+import com.samsung.android.knox.restriction.RestrictionPolicy;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -37,24 +38,82 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
         return "RNSamsungMdm";
     }
 
+    public void activateKnoxLicense(Context context, String licenseKey,packageName) {
+        try{
+            KnoxEnterpriseLicenseManager knoxEnterpriseLicenseManager = KnoxEnterpriseLicenseManager.getInstance(context);
+            knoxEnterpriseLicenseManager.activateLicense(licenseKey,packageName);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    public void activateBackwardLicense(Context context, String licenseKey) {
+
+        try{
+            EnterpriseLicenseManager enterpriseLicenseManager = EnterpriseLicenseManager.getInstance(context);
+            enterpriseLicenseManager.activateLicense(licenseKey);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
     @ReactMethod
-    public void isSamsungPoliciesEnabled(Promise promise) {
+    public void deactivateKey(Promise promise,String key){
         try {
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
-            MiscPolicy mp = mEDM.getMiscPolicy();
-            mp.setCameraState(true);
+            KnoxEnterpriseLicenseManager knoxEnterpriseLicenseManager = KnoxEnterpriseLicenseManager.getInstance(reactContext);
+            knoxEnterpriseLicenseManager.deActivateLicense(key);
             promise.resolve(true);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.resolve(false);
         }
     }
 
     @ReactMethod
-    public void enableSamsungPolicies(String packageName, String elmLicenseKey, Promise promise) {
+    public void isSamsungPoliciesEnabled(Promise promise) {
         try {
-            EnterpriseLicenseManager.getInstance(this.reactContext).activateLicense(elmLicenseKey, packageName);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
+            RestrictionPolicy restrictionPolicy = mEDM.getRestrictionPolicy();
+            restrictionPolicy.setCameraState(true);
             promise.resolve(true);
         } catch (Exception e) {
+            e.printStackTrace();
+            promise.resolve(false);
+        }
+    }
+
+    public boolean isKnoxSdkSupported() {
+        try {
+            EnterpriseDeviceManager.getAPILevel();
+            return true;
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+//    public boolean isMdmApiSupported(int requiredVersion) {
+//        try {
+//            return EnterpriseDeviceManager.getAPILevel() < requiredVersion;
+//        } catch (RuntimeException e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+//    }
+
+    @ReactMethod
+    public void enableSamsungPolicies(String packageName, String elmLicenseKey, String backwardKey,Promise promise) {
+        try {
+            // isKnoxSdkSupported();
+
+            this.activateBackwardLicense(this.reactContext,backwardKey);
+            this.activateKnoxLicense(this.reactContext,elmLicenseKey,packageName);
+
+            promise.resolve(true);
+        } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -62,7 +121,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     @ReactMethod
     public void enableOrDisableGps(boolean gpsMandatory, Promise promise) {
         try {
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             LocationPolicy locationPolicy = mEDM.getLocationPolicy();
             if (gpsMandatory && !locationPolicy.getLocationProviderState("gps")) {
                 locationPolicy.startGPS(true);
@@ -70,6 +129,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             locationPolicy.setGPSStateChangeAllowed(!gpsMandatory);
             promise.resolve(true);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -77,7 +137,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     @ReactMethod
     public void enableOrDisableAndroidBrowser(boolean isAndroidBrowserDisabled, Promise promise) {
         try {
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             if (isAndroidBrowserDisabled) {
                 appPolicy.disableAndroidBrowser();
@@ -86,6 +146,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             }
             promise.resolve(true);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -93,7 +154,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     @ReactMethod
     public void enableOrDisablePlayStore(boolean isPlayStoreDisabled, Promise promise) {
         try {
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             if (isPlayStoreDisabled) {
                 appPolicy.disableAndroidMarket();
@@ -102,6 +163,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             }
             promise.resolve(true);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -109,7 +171,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     @ReactMethod
     public void enableOrDisableYouTube(boolean isYouTubeDisabled, Promise promise) {
         try {
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             if (isYouTubeDisabled) {
                 appPolicy.disableYouTube();
@@ -118,6 +180,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             }
             promise.resolve(true);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -130,11 +193,12 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             for (int index = 0; index < appsToBeUninstalledList.length(); index++) {
                 appList.add(appsToBeUninstalledList.getString(index));
             }
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             appPolicy.uninstallApplications(appList);
             promise.resolve(true);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -144,7 +208,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
         try {
             boolean result = false;
             JSONArray appsToBeBlackListedList = new JSONArray(appsToBeBlackListed);
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             appPolicy.clearAppPackageNameFromList();
             for (int index = 0; index < appsToBeBlackListedList.length(); index++) {
@@ -153,6 +217,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             }
             promise.resolve(true);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -163,7 +228,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             boolean result = false;
             List packageList = new ArrayList();
             packageList.add(packageName);
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             if (isForceStopEnabled) {
                 result = appPolicy.addPackagesToForceStopBlackList(packageList);
@@ -172,6 +237,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             }
             promise.resolve(result);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -182,7 +248,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             boolean result = false;
             List packageList = new ArrayList();
             packageList.add(packageName);
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             ApplicationPolicy appPolicy = mEDM.getApplicationPolicy();
             if (isNotificationDisabled) {
                 result = appPolicy.addPackagesToNotificationWhiteList(packageList);
@@ -198,7 +264,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     @ReactMethod
     public void enableOrDisableSetting(boolean isSettingChangeDisabled, Promise promise) {
         try {
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             RestrictionPolicy restrictionPolicy = mEDM.getRestrictionPolicy();
             if (isSettingChangeDisabled) {
                 restrictionPolicy.allowSettingsChanges(false);
@@ -215,7 +281,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     public void enableOrDisableOutgoingCall(boolean isOutgoingCallDisabled, Promise promise) {
         try {
             boolean result = false;
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             PhoneRestrictionPolicy phoneRestrictionPolicy = mEDM.getPhoneRestrictionPolicy();
             if (isOutgoingCallDisabled) {
                 phoneRestrictionPolicy.removeOutgoingCallExceptionPattern();
@@ -235,7 +301,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     public void enableOrDisableOutgoingSMS(boolean isOutgoingSMSDisabled, Promise promise) {
         try {
             boolean result = false;
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             PhoneRestrictionPolicy phoneRestrictionPolicy = mEDM.getPhoneRestrictionPolicy();
             if (isOutgoingSMSDisabled) {
                 phoneRestrictionPolicy.removeOutgoingSmsExceptionPattern();
@@ -247,6 +313,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             }
             promise.resolve(result);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }
@@ -255,7 +322,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
     public void setOutgoingCallLimit(int limit, Promise promise) {
         try {
             boolean result = false;
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             PhoneRestrictionPolicy phoneRestrictionPolicy = mEDM.getPhoneRestrictionPolicy();
             result = phoneRestrictionPolicy.enableLimitNumberOfCalls(true);
             if (result) {
@@ -263,15 +330,18 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             }
             promise.resolve(result);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
+
+
     }
 
     @ReactMethod
     public void setOutgoingSMSLimit(int limit, Promise promise) {
         try {
             boolean result = false;
-            EnterpriseDeviceManager mEDM = new EnterpriseDeviceManager(reactContext);
+            EnterpriseDeviceManager mEDM = EnterpriseDeviceManager.getInstance(reactContext);
             PhoneRestrictionPolicy phoneRestrictionPolicy = mEDM.getPhoneRestrictionPolicy();
             result = phoneRestrictionPolicy.enableLimitNumberOfSms(true);
             if (result) {
@@ -279,6 +349,7 @@ public class RNMdmSamsungPolicies extends ReactContextBaseJavaModule {
             }
             promise.resolve(result);
         } catch (Exception e) {
+            e.printStackTrace();
             promise.reject(e.getMessage());
         }
     }

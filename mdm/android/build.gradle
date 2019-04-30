@@ -32,6 +32,7 @@ repositories {
 
 dependencies {
     compile 'com.facebook.react:react-native:+'
-    compile files('libs/edm.jar')
+    runtimeOnly files('libs/supportlib.jar')
+    compileOnly files('libs/knoxsdk.jar')
 }
   
