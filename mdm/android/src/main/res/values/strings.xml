@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <!-- KPE License Error Codes -->
+    <string name="err_klm_internal">KnoxLicenseManager: Internal error</string>
+    <string name="err_klm_internal_server">KnoxLicenseManager: Internal server error</string>
+    <string name="err_klm_licence_invalid_license">KnoxLicenseManager: Invalid license</string>
+    <string name="err_klm_invalid_package_name">KnoxLicenseManager: Invalid package name</string>
+    <string name="err_klm_licence_terminated">KnoxLicenseManager: License terminated</string>
+    <string name="err_klm_network_disconnected">KnoxLicenseManager: Network disconnected</string>
+    <string name="err_klm_network_general">KnoxLicenseManager: Network general error</string>
+    <string name="err_klm_unknown">KnoxLicenseManager: Error unknown</string>
+    <string name="err_klm_code_unknown">KnoxLicenseManager: Error code unknown %1$s, status %2$s</string>
+    <string name="err_klm_not_current_date">KnoxLicenseManager: Not current date</string>
+    <string name="err_klm_sig_mismatch">KnoxLicenseManager: Caller package signature mismatch</string>
+    <string name="err_klm_ver_code_mismatch">KnoxLicenseManager: Caller package version code mismatch</string>
+    <string name="err_klm_null_params">KnoxLicenseManager: NULL params</string>
+    <string name="err_klm_user_disagrees_license_agreement">KLM: User disagrees EULA</string>
+
+
+    <!-- License activation messages -->
+    <string name="no_intent">License activation intent is not available</string>
+    <string name="no_intent_action">License activation intent action is not available</string>
+    <string name="klm_action_successful">Action successful</string>
+
+    <!-- API level -->
+    <string name="api_level_message">This device does not support the new Knox SDK and Samsung
+        Knox Licence (SKL)
+        licensing scheme. API level %1$d detected.
+        Requires
+        level %2$d
+        .</string>
+    <string name="err_elm_code_unknown">code_unknown</string>
+    <string name="err_elm_ver_code_mismatch">code mismacth</string>
+    <string name="err_elm_user_disagrees_license_agreement">user disagree license</string>
+    <string name="err_elm_unknown">elm unknown</string>
+    <string name="err_elm_sig_mismatch">sig mismatch</string>
+    <string name="err_elm_null_params">null params</string>
+    <string name="err_elm_not_current_date">not current date</string>
+    <string name="err_elm_network_general">network general</string>
+    <string name="err_elm_internal">internal error</string>
+    <string name="err_elm_internal_server">internal server error</string>
+    <string name="err_elm_licence_invalid_license">invalid license</string>
+    <string name="err_elm_invalid_package_name">invalid package name</string>
+    <string name="err_elm_licence_terminated">license terminated</string>
+    <string name="err_elm_network_disconnected">network disconnected</string>
+    <string name="elm_activated_succesfully">elm activated success</string>
+    <string name="klm_activated_successfully">klm activtaed success</string>
+
+
+</resources>
+
+
+
