@@ -1,6 +1,6 @@
 # react-native-device-management
 
-![react-native-device-management logo](./logo/lock-icon-200x200.png)
+<p align="center"> <img src="./logo/lock-icon-200x200.png" alt="react-native-device-management logo"/> </p>
 
 Enterprise mobile device management solution for the android build with react native.
 
